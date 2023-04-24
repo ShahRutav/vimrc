@@ -2,8 +2,13 @@ call plug#begin()
 
 Plug 'madox2/vim-ai' "ChatGPT with vim. Wohooo!
 Plug 'dense-analysis/ale' " Ale plugin for linting
+Plug 'github/copilot.vim' " Github pluging for copliot
 
 call plug#end()
+
+" remapping copilot keys ro Ctrl + J
+imap <silent><script><expr> <C-J> copilot#Accept("\<CR>")
+let g:copilot_no_tab_map = v:true
 
 " complete text on the current line or in visual selection
 nnoremap <leader>a :AI<CR>
@@ -18,11 +23,11 @@ nnoremap <leader>c :AIChat<CR>
 nnoremap <leader>r :AIRedo<CR>
 
 " Fix files with prettier, and then ESLint.
-let b:ale_fixers = ['prettier', 'eslint']
-let g:ale_linters = {'python': ['pycodestyle']}
+let b:ale_fixers = ['pylint']
+" let g:ale_linters = {'python': ['pylint']}
 " You should not turn this setting on if you wish to use ALE as a completion
 " source for other completion plugins, like Deoplete.
-let g:ale_completion_enabled = 1
+" let g:ale_completion_enabled = 1
 
 " Disable compatibility with vi which can cause unexpected issues.
 set nocompatible
