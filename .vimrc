@@ -7,6 +7,8 @@ Plug 'lervag/vimtex' " Vimtex plugin for latex
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 Plug 'nordtheme/vim'
+Plug 'preservim/nerdtree'
+Plug 'tpope/vim-commentary'
 
 call plug#end()
 
@@ -27,6 +29,12 @@ let g:fzf_colors =
   \ 'spinner': ['white', 'Label'],
   \ 'header':  ['white', 'Comment'] }
 "========================== Embark theme
+
+" ======================= NERDTREE
+nnoremap <leader>n :NERDTreeFocus<CR>
+nnoremap <C-n> :NERDTree<CR>
+nnoremap <C-t> :NERDTreeToggle<CR>
+nnoremap <C-f> :NERDTreeFind<CR>
 
 " ======================= VIMTEX
 set encoding=utf8
