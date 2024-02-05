@@ -9,8 +9,14 @@ Plug 'junegunn/fzf.vim'
 Plug 'nordtheme/vim'
 Plug 'preservim/nerdtree'
 Plug 'tpope/vim-commentary'
+Plug 'jupyter-vim/jupyter-vim'
 
 call plug#end()
+
+" ======================= jupyter-vim
+vmap <leader>jr :JupyterSendRange<CR>
+nnoremap <leader>rf :JupyterRunFile<CR>
+nnoremap <leader>im :PythonImportThisFile<CR>
 
 "======================= FZF
 
