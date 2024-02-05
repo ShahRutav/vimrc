@@ -60,6 +60,18 @@ echo "YOUR_OPENAI_API_KEY" > ~/.config/openai.token
 export OPENAI_API_KEY="YOUR_OPENAI_API_KEY"
 ```
 
+## jupyter vim
+
+For detailed [instructions](https://github.com/jupyter-vim/jupyter-vim)
+1. `pip install jupyter`
+2. Follow the steps [here](https://github.com/jupyter-vim/jupyter-vim?tab=readme-ov-file#jupyter-configuration)
+3. To begin a session:
+```
+$ jupyter qtconsole &  # open a jupyter console window
+$ vim <your_script>.py
+:JupyterConnect
+```
+
 ## vimtex setup
 
 1. Install basic mac-tex: `https://www.ctan.org/pkg/mactex-basic`
