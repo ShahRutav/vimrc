@@ -10,8 +10,10 @@ Plug 'nordtheme/vim'
 Plug 'preservim/nerdtree'
 Plug 'tpope/vim-commentary'
 Plug 'jupyter-vim/jupyter-vim'
+Plug 'tpope/vim-fugitive'
 
 call plug#end()
+
 
 " ======================= jupyter-vim
 vmap <leader>jr :JupyterSendRange<CR>
@@ -41,6 +43,7 @@ nnoremap <leader>n :NERDTreeFocus<CR>
 nnoremap <C-n> :NERDTree<CR>
 nnoremap <C-t> :NERDTreeToggle<CR>
 nnoremap <C-f> :NERDTreeFind<CR>
+let g:NERDTreeFileLines = 1
 
 " ======================= VIMTEX
 set encoding=utf8
