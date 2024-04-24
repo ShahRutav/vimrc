@@ -11,9 +11,17 @@ Plug 'preservim/nerdtree'
 Plug 'tpope/vim-commentary'
 Plug 'jupyter-vim/jupyter-vim'
 Plug 'tpope/vim-fugitive'
+Plug 'jpalardy/vim-slime'
+Plug 'airblade/vim-gitgutter'
+Plug 'habamax/vim-polar'
 
 call plug#end()
 
+" ======================= vim-slime
+let g:slime_target = "tmux"
+let g:slime_default_config = {"socket_name": "default", "target_pane": "1"}
+" let g:slime_python_ipython = 1
+let g:slime_bracketed_paste = 1
 
 " ======================= jupyter-vim
 vmap <leader>jr :JupyterSendRange<CR>
@@ -22,6 +30,7 @@ nnoremap <leader>im :PythonImportThisFile<CR>
 
 "======================= FZF
 
+let $FZF_DEFAULT_OPTS = '--color=preview-bg:234'
 let g:fzf_colors =
 \ { 'fg':      ['white', 'Normal'],
   \ 'bg':      ['black', 'Normal'],
@@ -103,9 +112,9 @@ set cursorlineopt=number
 
 set number
 set tabstop=4
-" set color slate
 set termguicolors
-colorscheme nord
+colorscheme polar
+" colorscheme nord
 " set background=dark
 set expandtab
 
