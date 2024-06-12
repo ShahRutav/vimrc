@@ -14,8 +14,16 @@ Plug 'tpope/vim-fugitive'
 Plug 'jpalardy/vim-slime'
 Plug 'airblade/vim-gitgutter'
 Plug 'habamax/vim-polar'
+Plug 'davidhalter/jedi-vim'
 
 call plug#end()
+
+"jedi-vim
+let g:jedi#popup_on_dot = 0
+nmap <leader>g <Plug>(jedi-goto)
+
+" ======================= Buffers from fzf
+nnoremap <silent> <C-b> :Buffers<CR>
 
 " ======================= vim-slime
 let g:slime_target = "tmux"
@@ -30,7 +38,7 @@ nnoremap <leader>im :PythonImportThisFile<CR>
 
 "======================= FZF
 
-let $FZF_DEFAULT_OPTS = '--color=preview-bg:234'
+" let $FZF_DEFAULT_OPTS = '--color=preview-bg:128'
 let g:fzf_colors =
 \ { 'fg':      ['white', 'Normal'],
   \ 'bg':      ['black', 'Normal'],
@@ -112,7 +120,7 @@ set cursorlineopt=number
 
 set number
 set tabstop=4
-set termguicolors
+" set termguicolors
 colorscheme polar
 " colorscheme nord
 " set background=dark
