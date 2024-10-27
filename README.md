@@ -50,7 +50,9 @@ For Plugins (`:source %` and): `:PlugInstall`
 1. Install [nodejs](https://nodejs.org/en/download)
 2. `:Copilot setup`
 
-## gpt-4
+## [copilot chat](https://github.com/CopilotC-Nvim/CopilotChat.nvim)
+
+## gpt-4 (not for neovim)
 
 ```
 # save api key to `~/.config/openai.token` file
@@ -79,3 +81,19 @@ $ vim <your_script>.py
 3. latexmk: `sudo tlmgr install latexmk`
 4. Install: `brew install --cask skim`
 4. Change the pdfviewer to `skim` instead of `zathura`
+
+## nvim-treesitter
+1. For python: `npm install -g pyright`
+
+
+
+
+# Moving to neovim
+1. Building from [source](https://github.com/neovim/neovim?tab=readme-ov-file#install-from-source)
+2. Install pluginstall
+```
+sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
+       https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+```
+3. Copy the `init.vim` file:
+4. Install all the plugins using `:PlugInstall`
