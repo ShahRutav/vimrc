@@ -15,6 +15,7 @@ pip install pycodestyle pylint
 ```
 
 ## Setup
+For neovim `live_grep` install [ripgrep](https://github.com/BurntSushi/ripgrep)
 
 For [openAI GPT4 access](https://github.com/madox2/vim-ai):
 ```
