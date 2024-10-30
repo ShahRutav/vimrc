@@ -47,42 +47,28 @@ set foldexpr=nvim_treesitter#foldexpr()
 set nofoldenable
 
 
-" ======================= toggleterm.nvim =======================
-lua <<EOF
-require'toggleterm'.setup {
-  size = 15,
-  hide_numbers = true,
-  shade_filetypes = {},
-  shade_terminals = true,
-  shading_factor = '0.2',
-  start_in_insert = true,
-  insert_mappings = true,
-  persist_size = true,
-  direction = 'horizontal',
-  close_on_exit = false,
-  shell = vim.o.shell,
-}
-EOF
-" Define a Lua function to toggle a terminal by ID
-lua << EOF
-function _G.toggle_n_term(term_id)
-  vim.cmd("ToggleTerm " .. term_id)
-end
-EOF
-
-" Loop to create key mappings for multiple terminals (1 to 10)
-for i in range(1, 10)
-  execute 'nnoremap <silent> <leader>t' . i . ' :lua toggle_n_term(' . i . ')<CR>'
-endfor
-autocmd TermOpen * tnoremap <buffer> <Esc> <C-\><C-n>
-
 " ======================= Copilot Settings =======================
 lua << EOF
 require("CopilotChat").setup {
   debug = true, -- Enable debugging
   -- See Configuration section for rest
 }
+vim.keymap.set("n", "<leader>ccq", function()
+  local input = vim.fn.input("Quick Chat: ")
+  if input ~= "" then
+    require("CopilotChat").ask(input, { selection = require("CopilotChat.select").buffer })
+  end
+end, { desc = "CopilotChat - Quick chat" })
 EOF
+
+" Map <leader>cch to CopilotChat help actions
+lua << EOF
+vim.api.nvim_set_keymap('n', '<leader>cch', [[<cmd>lua require("CopilotChat.integrations.telescope").pick(require("CopilotChat.actions").help_actions())<CR>]], { noremap = true, silent = true, desc = "CopilotChat - Help actions" })
+
+vim.api.nvim_set_keymap('n', '<leader>ccp', [[<cmd>lua require("CopilotChat.integrations.telescope").pick(require("CopilotChat.actions").prompt_actions())<CR>]], { noremap = true, silent = true, desc = "CopilotChat - Prompt actions" })
+EOF
+
+
 
 " ======================= Telescope Settings =======================
 noremap <leader>ff <cmd>Telescope find_files<cr>
@@ -160,3 +146,53 @@ colorscheme tokyonight
 " =================== Autocommands ====================
 " Remove trailing whitespace on save
 autocmd BufWritePre * :%s/\s\+$//e
+
+
+" ======================= toggleterm.nvim =======================
+" make the background of toggleterm transparent
+" print all the colors available in lua script after local colors
+" print(vim.inspect(colors))
+lua <<EOF
+local colors = require("tokyonight.colors").setup()
+require'toggleterm'.setup {
+  size = 20,
+  hide_numbers = true,
+  shade_terminals = false,
+  shading_factor = 3,
+  start_in_insert = true,
+  insert_mappings = true,
+  persist_size = true,
+  direction = 'horizontal',  -- Default direction
+  close_on_exit = false,
+  shell = vim.o.shell,
+  highlights = {
+    Normal = {
+      guibg = colors.fg_gutter,
+    }
+  }
+}
+EOF
+
+" Define Lua functions to toggle terminals horizontally or vertically
+lua <<EOF
+function _G.toggle_n_term_horizontal(term_id)
+  require('toggleterm.terminal').Terminal:new({ id = term_id, direction = 'horizontal' }):toggle()
+end
+
+function _G.toggle_n_term_vertical(term_id)
+  require('toggleterm.terminal').Terminal:new({ id = term_id, direction = 'vertical' }):toggle()
+end
+EOF
+
+" Create key mappings for horizontal terminal toggles (1 to 10)
+for i in range(1, 10)
+  execute 'nnoremap <silent> <leader>th' . i . ' :lua toggle_n_term_horizontal(' . i . ')<CR>'
+endfor
+
+" Create key mappings for vertical terminal toggles (1 to 10)
+for i in range(1, 10)
+  execute 'nnoremap <silent> <leader>tv' . i . ' :lua toggle_n_term_vertical(' . i . ')<CR>'
+endfor
+
+" Map <Esc> to exit terminal mode
+autocmd TermOpen * tnoremap <buffer> <Esc> <C-\><C-n>
