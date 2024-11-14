@@ -66,6 +66,10 @@ lua << EOF
 vim.api.nvim_set_keymap('n', '<leader>cch', [[<cmd>lua require("CopilotChat.integrations.telescope").pick(require("CopilotChat.actions").help_actions())<CR>]], { noremap = true, silent = true, desc = "CopilotChat - Help actions" })
 
 vim.api.nvim_set_keymap('n', '<leader>ccp', [[<cmd>lua require("CopilotChat.integrations.telescope").pick(require("CopilotChat.actions").prompt_actions())<CR>]], { noremap = true, silent = true, desc = "CopilotChat - Prompt actions" })
+
+vim.api.nvim_set_keymap('n', '<leader>cc', ':CopilotChat<CR>', { noremap = true, silent = true })   -- Open Copilot chat
+vim.api.nvim_set_keymap('n', '<leader>cq', ':CopilotChatStop<CR>', { noremap = true, silent = true })   -- Quit Copilot chat
+
 EOF
 
 
@@ -142,6 +146,11 @@ let g:fzf_colors = {
 " =================== Colorscheme ====================
 " colorscheme polar  " Use the polar colorscheme
 colorscheme tokyonight
+highlight WinSeparator guifg=#FFFFFF
+
+set fillchars+=vert:\┃
+
+
 
 " =================== Autocommands ====================
 " Remove trailing whitespace on save
@@ -196,3 +205,10 @@ endfor
 
 " Map <Esc> to exit terminal mode
 autocmd TermOpen * tnoremap <buffer> <Esc> <C-\><C-n>
+autocmd InsertLeave,TextChanged * silent! write
+
+" Set fold method (options: manual, indent, expr, marker, syntax)
+set foldmethod=indent
+
+" Set fold level to start with all folds open
+set foldlevel=99
