@@ -21,6 +21,8 @@ Plug 'tpope/vim-fugitive'                " Git integration
 Plug 'jpalardy/vim-slime'                " Send code to tmux
 Plug 'airblade/vim-gitgutter'            " Git diff indicators
 Plug 'folke/tokyonight.nvim'             " Tokyonight colorscheme
+Plug 'catppuccin/nvim', { 'as': 'catppuccin' }
+
 
 " Initialize plugins
 call plug#end()
@@ -145,8 +147,15 @@ let g:fzf_colors = {
 
 " =================== Colorscheme ====================
 " colorscheme polar  " Use the polar colorscheme
+" colorscheme catppuccin
 colorscheme tokyonight
+
 highlight WinSeparator guifg=#FFFFFF
+" Define a transparent highlight group
+
+" Apply the highlight to inactive windows
+autocmd WinEnter * setlocal winhighlight=Normal:Normal
+autocmd WinLeave * setlocal winhighlight=Normal:InactiveWindow
 
 set fillchars+=vert:\┃
 
@@ -166,7 +175,7 @@ local colors = require("tokyonight.colors").setup()
 require'toggleterm'.setup {
   size = 20,
   hide_numbers = true,
-  shade_terminals = false,
+  shade_terminals = true,
   shading_factor = 3,
   start_in_insert = true,
   insert_mappings = true,
@@ -181,6 +190,9 @@ require'toggleterm'.setup {
   }
 }
 EOF
+
+" highlight InactiveWindow guibg w.r.t. to tokynight colorscheme
+highlight InactiveWindow guibg=#414868
 
 " Define Lua functions to toggle terminals horizontally or vertically
 lua <<EOF
