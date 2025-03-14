@@ -16,6 +16,9 @@ Plug 'junegunn/fzf', { 'do': { -> fzf#install() } } " FZF binary install
 Plug 'junegunn/fzf.vim'                  " FZF Vim integration
 Plug 'nordtheme/vim'                     " Nord colorscheme
 Plug 'preservim/nerdtree'                " NERDTree for file navigation
+Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+Plug 'nvim-treesitter/nvim-treesitter-context'
+
 Plug 'tpope/vim-commentary'              " Comment toggling
 Plug 'tpope/vim-fugitive'                " Git integration
 Plug 'jpalardy/vim-slime'                " Send code to tmux
@@ -41,6 +44,24 @@ require'nvim-treesitter.configs'.setup {
     enable = true               -- Enable Treesitter-based indentation
   }
 }
+local ok, context = pcall(require, 'treesitter-context')
+if ok then
+  context.setup{
+    enable = true, -- Enable this plugin (Can be enabled/disabled later via commands)
+    multiwindow = false, -- Enable multiwindow support.
+    max_lines = 0, -- How many lines the window should span. Values <= 0 mean no limit.
+    min_window_height = 0, -- Minimum editor window height to enable context. Values <= 0 mean no limit.
+    line_numbers = true,
+    multiline_threshold = 20, -- Maximum number of lines to show for a single context
+    trim_scope = 'outer', -- Which context lines to discard if `max_lines` is exceeded. Choices: 'inner', 'outer'
+    mode = 'cursor',  -- Line used to calculate context. Choices: 'cursor', 'topline'
+    separator = nil,
+    zindex = 20, -- The Z-index of the context window
+    on_attach = nil, -- (fun(buf: integer): boolean) return false to disable attaching
+  }
+else
+  vim.api.nvim_err_writeln("treesitter-context not found. Please install it.")
+end
 EOF
 
 " Optional: Enable code folding using Treesitter
@@ -85,9 +106,11 @@ nnoremap <leader>fh <cmd>Telescope help_tags<cr>
 
 " ======================= Basic Settings ========================
 set nocompatible             " Disable vi compatibility
-" filetype on                  " Enable file type detection
-" filetype plugin on           " Enable plugin loading for file types
-" filetype indent on           " Enable indentation rules for file types
+filetype on                  " Enable file type detection
+filetype plugin on           " Enable plugin loading for file types
+filetype indent on           " Enable indentation rules for file types
+set signcolumn=auto
+
 " syntax on                    " Enable syntax highlighting
 set termguicolors            " Enable 24-bit RGB color
 set encoding=utf8            " Set encoding to UTF-8
@@ -115,6 +138,7 @@ let g:slime_bracketed_paste = 1
 " ALE settings
 let g:ale_fixers = {'python': ['pylint']}
 let g:ale_linters = {'python': ['pylint']}
+let g:ale_python_pylint_options = '--disable=all --enable=E'
 
 " =================== Copilot Settings ====================
 " Remap Copilot accept to Ctrl + J
