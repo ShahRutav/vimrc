@@ -7,6 +7,8 @@ Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.8' }
 Plug 'zbirenbaum/copilot.lua'
 Plug 'nvim-lua/plenary.nvim'
 Plug 'CopilotC-Nvim/CopilotChat.nvim', { 'branch': 'canary' }
+Plug 'dccsillag/magma-nvim', { 'do': ':UpdateRemotePlugins' }
+
 
 " Plugin List
 Plug 'dense-analysis/ale'                " ALE for linting
@@ -24,13 +26,29 @@ Plug 'tpope/vim-fugitive'                " Git integration
 Plug 'jpalardy/vim-slime'                " Send code to tmux
 Plug 'airblade/vim-gitgutter'            " Git diff indicators
 Plug 'folke/tokyonight.nvim'             " Tokyonight colorscheme
-Plug 'catppuccin/nvim', { 'as': 'catppuccin' }
-
 
 " Initialize plugins
 call plug#end()
 
 " ----------------------- Plugin Settings -----------------------
+"  Magma shortcuts
+" Automatically open the output window (set to 0 if you don't want this)
+let g:magma_automatically_open_output = 0
+" Start a Jupyter kernel
+nnoremap <leader>mi :MagmaInit python3<CR>
+" Evaluate the current line
+nnoremap <leader>r :MagmaEvaluateLine<CR>
+" Evaluate the current visual selection
+vnoremap <leader>r :<C-u>MagmaEvaluateVisual<CR>
+" Evaluate the whole file
+nnoremap <leader>rf :MagmaEvaluateFile<CR>
+" Re-evaluate the last cell
+nnoremap <leader>rc :MagmaReevaluateCell<CR>
+" Show output of the last evaluation
+nnoremap <leader>o :MagmaShowOutput<CR>
+" Close the Magma output window
+nnoremap <leader>q :MagmaHideOutput<CR>
+
 " ======================= nvim-treesitter =======================
 " Treesitter setup
 lua << EOF
@@ -93,6 +111,7 @@ vim.api.nvim_set_keymap('n', '<leader>ccp', [[<cmd>lua require("CopilotChat.inte
 vim.api.nvim_set_keymap('n', '<leader>cc', ':CopilotChat<CR>', { noremap = true, silent = true })   -- Open Copilot chat
 vim.api.nvim_set_keymap('n', '<leader>cq', ':CopilotChatStop<CR>', { noremap = true, silent = true })   -- Quit Copilot chat
 
+vim.o.paste = false  -- Disable paste mode
 EOF
 
 
@@ -105,13 +124,12 @@ nnoremap <leader>fh <cmd>Telescope help_tags<cr>
 
 
 " ======================= Basic Settings ========================
-set nocompatible             " Disable vi compatibility
+set nocompatible               " Disable compatibility with old Vim
 filetype on                  " Enable file type detection
 filetype plugin on           " Enable plugin loading for file types
 filetype indent on           " Enable indentation rules for file types
 set signcolumn=auto
 
-" syntax on                    " Enable syntax highlighting
 set termguicolors            " Enable 24-bit RGB color
 set encoding=utf8            " Set encoding to UTF-8
 set number                   " Show line numbers
@@ -171,13 +189,8 @@ let g:fzf_colors = {
 
 " =================== Colorscheme ====================
 " colorscheme polar  " Use the polar colorscheme
-" colorscheme catppuccin
 colorscheme tokyonight
-
 highlight WinSeparator guifg=#FFFFFF
-" Define a transparent highlight group
-
-" Apply the highlight to inactive windows
 autocmd WinEnter * setlocal winhighlight=Normal:Normal
 autocmd WinLeave * setlocal winhighlight=Normal:InactiveWindow
 
@@ -215,9 +228,7 @@ require'toggleterm'.setup {
 }
 EOF
 
-" highlight InactiveWindow guibg w.r.t. to tokynight colorscheme
 highlight InactiveWindow guibg=#414868
-
 " Define Lua functions to toggle terminals horizontally or vertically
 lua <<EOF
 function _G.toggle_n_term_horizontal(term_id)
@@ -248,3 +259,6 @@ set foldmethod=indent
 
 " Set fold level to start with all folds open
 set foldlevel=99
+
+"Toggle current fold
+nnoremap za :normal! za<CR>
