@@ -1,14 +1,16 @@
-" Initialize vim-plug plugin manager
+-----------------------------------------------------------
+-- Plugin manager: vim-plug (still works from init.lua)
+-----------------------------------------------------------
+vim.cmd [[
 call plug#begin('~/.local/share/nvim/plugged')
+
+" Core plugins
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 Plug 'akinsho/toggleterm.nvim', {'tag' : '*'}
 Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.8' }
 Plug 'zbirenbaum/copilot.lua'
-Plug 'nvim-lua/plenary.nvim'
-Plug 'CopilotC-Nvim/CopilotChat.nvim', { 'branch': 'canary' }
-Plug 'dccsillag/magma-nvim', { 'do': ':UpdateRemotePlugins' }
-
+Plug 'CopilotC-Nvim/CopilotChat.nvim', { 'branch': 'main' }
 
 " Plugin List
 Plug 'dense-analysis/ale'                " ALE for linting
@@ -18,247 +20,324 @@ Plug 'junegunn/fzf', { 'do': { -> fzf#install() } } " FZF binary install
 Plug 'junegunn/fzf.vim'                  " FZF Vim integration
 Plug 'nordtheme/vim'                     " Nord colorscheme
 Plug 'preservim/nerdtree'                " NERDTree for file navigation
-Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
-Plug 'nvim-treesitter/nvim-treesitter-context'
-
 Plug 'tpope/vim-commentary'              " Comment toggling
 Plug 'tpope/vim-fugitive'                " Git integration
 Plug 'jpalardy/vim-slime'                " Send code to tmux
 Plug 'airblade/vim-gitgutter'            " Git diff indicators
 Plug 'folke/tokyonight.nvim'             " Tokyonight colorscheme
+Plug 'catppuccin/nvim', { 'as': 'catppuccin' }
+Plug 'Vigemus/iron.nvim'
 
-" Initialize plugins
+" avante
+Plug 'yetone/avante.nvim'
+Plug 'nvim-lua/plenary.nvim'
+Plug 'MunifTanjim/nui.nvim'
+
+" transfer nvim
+Plug 'coffebar/transfer.nvim'
+
 call plug#end()
+]]
 
-" ----------------------- Plugin Settings -----------------------
-"  Magma shortcuts
-" Automatically open the output window (set to 0 if you don't want this)
-let g:magma_automatically_open_output = 0
-" Start a Jupyter kernel
-nnoremap <leader>mi :MagmaInit python3<CR>
-" Evaluate the current line
-nnoremap <leader>r :MagmaEvaluateLine<CR>
-" Evaluate the current visual selection
-vnoremap <leader>r :<C-u>MagmaEvaluateVisual<CR>
-" Evaluate the whole file
-nnoremap <leader>rf :MagmaEvaluateFile<CR>
-" Re-evaluate the last cell
-nnoremap <leader>rc :MagmaReevaluateCell<CR>
-" Show output of the last evaluation
-nnoremap <leader>o :MagmaShowOutput<CR>
-" Close the Magma output window
-nnoremap <leader>q :MagmaHideOutput<CR>
+----------------------- Avante setup ----------------------
+require("avante").setup {
+  provider = "openai",               -- Pick your model/provider
+  instructions_file = "avante.md",   -- Optional: custom filename
+}
+vim.opt.laststatus = 3
 
-" ======================= nvim-treesitter =======================
-" Treesitter setup
-lua << EOF
-require'nvim-treesitter.configs'.setup {
-  ensure_installed = { "lua", "python", "javascript", "html", "css" },  -- Add desired languages
+----------------------- transfer.nvim setup ----------------------`
+----- transfer.nvim setup
+local ok, transfer = pcall(require, "transfer")
+if ok then
+  transfer.setup({})
+end
+-- Optional: keymaps for convenience
+vim.keymap.set("n", "<leader>tu", "<cmd>TransferUpload<CR>",   { desc = "Transfer: upload" })
+vim.keymap.set("n", "<leader>td", "<cmd>TransferDownload<CR>", { desc = "Transfer: download" })
+vim.keymap.set("n", "<leader>ti", "<cmd>TransferInit<CR>",     { desc = "Transfer: init config" })
+
+
+
+-----------------------------------------------------------
+-- Basic settings
+-----------------------------------------------------------
+local opt = vim.opt
+
+opt.termguicolors = true         -- 24-bit colors
+opt.encoding = "utf-8"
+opt.number = true                -- line numbers
+opt.expandtab = true             -- spaces instead of tabs
+opt.tabstop = 4
+opt.shiftwidth = 4
+opt.cursorline = true
+opt.fillchars:append({ vert = "┃" })
+
+-- Folds: start with all folds open, indent-based
+opt.foldmethod = "indent"
+opt.foldlevel = 99
+
+-----------------------------------------------------------
+-- Colorscheme & highlights
+-----------------------------------------------------------
+vim.cmd [[colorscheme tokyonight]]
+
+-- Window separators and inactive window background
+vim.cmd [[highlight WinSeparator guifg=#FFFFFF]]
+vim.cmd [[highlight InactiveWindow guibg=#414868]]
+
+-- Inactive window dimming via winhighlight
+local augroup = vim.api.nvim_create_augroup
+local autocmd = vim.api.nvim_create_autocmd
+
+local winhl_group = augroup("WinHighlightConfig", { clear = true })
+autocmd("WinEnter", {
+  group = winhl_group,
+  pattern = "*",
+  command = "setlocal winhighlight=Normal:Normal",
+})
+autocmd("WinLeave", {
+  group = winhl_group,
+  pattern = "*",
+  command = "setlocal winhighlight=Normal:InactiveWindow",
+})
+
+-----------------------------------------------------------
+-- Treesitter
+-----------------------------------------------------------
+require("nvim-treesitter.configs").setup {
+  ensure_installed = { "lua", "python", "javascript", "html", "css" },
   highlight = {
-    enable = true,              -- Enable syntax highlighting
+    enable = true,
     additional_vim_regex_highlighting = false,
   },
-  indent = {
-    enable = true               -- Enable Treesitter-based indentation
-  }
+  indent = { enable = true },
 }
-local ok, context = pcall(require, 'treesitter-context')
-if ok then
-  context.setup{
-    enable = true, -- Enable this plugin (Can be enabled/disabled later via commands)
-    multiwindow = false, -- Enable multiwindow support.
-    max_lines = 0, -- How many lines the window should span. Values <= 0 mean no limit.
-    min_window_height = 0, -- Minimum editor window height to enable context. Values <= 0 mean no limit.
-    line_numbers = true,
-    multiline_threshold = 1, -- Maximum number of lines to show for a single context
-    trim_scope = 'outer', -- Which context lines to discard if `max_lines` is exceeded. Choices: 'inner', 'outer'
-    mode = 'cursor',  -- Line used to calculate context. Choices: 'cursor', 'topline'
-    separator = nil,
-    zindex = 20, -- The Z-index of the context window
-    on_attach = nil, -- (fun(buf: integer): boolean) return false to disable attaching
-  }
-else
-  vim.api.nvim_err_writeln("treesitter-context not found. Please install it.")
-end
-EOF
 
-" Optional: Enable code folding using Treesitter
-set foldmethod=expr
-set foldexpr=nvim_treesitter#foldexpr()
-set nofoldenable
+-----------------------------------------------------------
+-- Telescope keymaps
+-----------------------------------------------------------
+local map = vim.keymap.set
 
+map("n", "<leader>ff", "<cmd>Telescope find_files<CR>", { silent = true, desc = "Telescope: Find files" })
+map("n", "<leader>fg", "<cmd>Telescope live_grep<CR>", { silent = true, desc = "Telescope: Live grep" })
+map("n", "<leader>fb", "<cmd>Telescope buffers<CR>", { silent = true, desc = "Telescope: Buffers" })
+map("n", "<leader>fh", "<cmd>Telescope help_tags<CR>", { silent = true, desc = "Telescope: Help tags" })
 
-" ======================= Copilot Settings =======================
-lua << EOF
+-----------------------------------------------------------
+-- NERDTree keymaps
+-----------------------------------------------------------
+map("n", "<leader>n", ":NERDTreeFocus<CR>", { silent = true })
+map("n", "<C-n>", ":NERDTree<CR>", { silent = true })
+map("n", "<C-t>", ":NERDTreeToggle<CR>", { silent = true })
+map("n", "<C-f>", ":NERDTreeFind<CR>", { silent = true })
+
+-----------------------------------------------------------
+-- FZF
+-----------------------------------------------------------
+vim.g.fzf_colors = {
+  fg      = { "white", "Normal" },
+  bg      = { "black", "Normal" },
+  hl      = { "yellow", "Comment" },
+  ["fg+"] = { "white", "CursorLine", "CursorColumn", "Normal" },
+  ["bg+"] = { "black", "CursorLine", "CursorColumn" },
+  ["hl+"] = { "white", "Statement" },
+  info    = { "white", "PreProc" },
+  border  = { "white", "Ignore" },
+  prompt  = { "white", "Conditional" },
+  pointer = { "white", "Exception" },
+  marker  = { "white", "Keyword" },
+  spinner = { "white", "Label" },
+  header  = { "white", "Comment" },
+}
+
+-- FZF buffer search
+map("n", "<C-b>", ":Buffers<CR>", { silent = true })
+
+-----------------------------------------------------------
+-- Vim-Slime (tmux)
+-----------------------------------------------------------
+vim.g.slime_target = "tmux"
+vim.g.slime_default_config = { socket_name = "default", target_pane = "1" }
+vim.g.slime_bracketed_paste = 1
+
+-----------------------------------------------------------
+-- ALE
+-----------------------------------------------------------
+vim.g.ale_fixers = { python = { "pylint" } }
+vim.g.ale_linters = { python = { "pylint" } }
+
+-----------------------------------------------------------
+-- VimTeX
+-----------------------------------------------------------
+vim.g.vimtex_view_method = "zathura"
+vim.g.vimtex_compiler_progname = "nvr"
+vim.g.vimtex_view_automatic = 0
+
+-- Mapping for italicizing text in LaTeX (visual selection -> \emph{})
+-- This one is easier with a Vim command:
+vim.cmd [[vnoremap <C-i> :s/\%V\(.\+\)\%V/\\emph{\1}/g<CR>]]
+
+-----------------------------------------------------------
+-- Autocommands
+-----------------------------------------------------------
+
+-- Remove trailing whitespace on save
+local trim_group = augroup("TrimWhitespace", { clear = true })
+autocmd("BufWritePre", {
+  group = trim_group,
+  pattern = "*",
+  command = [[%s/\s\+$//e]],
+})
+
+-- Map <Esc> to exit terminal mode
+local term_group = augroup("TerminalConfig", { clear = true })
+autocmd("TermOpen", {
+  group = term_group,
+  pattern = "*",
+  callback = function()
+    map("t", "<Esc>", [[<C-\><C-n>]], { buffer = true })
+  end,
+})
+
+-- Auto-write on InsertLeave and TextChanged
+local autosave_group = augroup("AutoSave", { clear = true })
+autocmd({ "InsertLeave", "TextChanged" }, {
+  group = autosave_group,
+  pattern = "*",
+  command = "silent! write",
+})
+
+-----------------------------------------------------------
+-- CopilotChat settings
+-----------------------------------------------------------
 require("CopilotChat").setup {
-  debug = true, -- Enable debugging
-  -- See Configuration section for rest
+  debug = true,
+  -- add any extra config here
 }
-vim.keymap.set("n", "<leader>ccq", function()
+
+-- Quick chat mapping
+map("n", "<leader>ccq", function()
   local input = vim.fn.input("Quick Chat: ")
   if input ~= "" then
     require("CopilotChat").ask(input, { selection = require("CopilotChat.select").buffer })
   end
 end, { desc = "CopilotChat - Quick chat" })
-EOF
 
-" Map <leader>cch to CopilotChat help actions
-lua << EOF
-vim.api.nvim_set_keymap('n', '<leader>cch', [[<cmd>lua require("CopilotChat.integrations.telescope").pick(require("CopilotChat.actions").help_actions())<CR>]], { noremap = true, silent = true, desc = "CopilotChat - Help actions" })
+-- Telescope integrations for CopilotChat
+local copilot_actions = require("CopilotChat.actions")
+local copilot_tel = require("CopilotChat.integrations.telescope")
 
-vim.api.nvim_set_keymap('n', '<leader>ccp', [[<cmd>lua require("CopilotChat.integrations.telescope").pick(require("CopilotChat.actions").prompt_actions())<CR>]], { noremap = true, silent = true, desc = "CopilotChat - Prompt actions" })
+map("n", "<leader>cch", function()
+  copilot_tel.pick(copilot_actions.help_actions())
+end, { silent = true, desc = "CopilotChat - Help actions" })
 
-vim.api.nvim_set_keymap('n', '<leader>cc', ':CopilotChat<CR>', { noremap = true, silent = true })   -- Open Copilot chat
-vim.api.nvim_set_keymap('n', '<leader>cq', ':CopilotChatStop<CR>', { noremap = true, silent = true })   -- Quit Copilot chat
+map("n", "<leader>ccp", function()
+  copilot_tel.pick(copilot_actions.prompt_actions())
+end, { silent = true, desc = "CopilotChat - Prompt actions" })
 
-vim.o.paste = false  -- Disable paste mode
-EOF
+map("n", "<leader>cc", ":CopilotChat<CR>", { silent = true, desc = "CopilotChat - Open" })
+map("n", "<leader>cq", ":CopilotChatStop<CR>", { silent = true, desc = "CopilotChat - Stop" })
 
-
-
-" ======================= Telescope Settings =======================
-noremap <leader>ff <cmd>Telescope find_files<cr>
-nnoremap <leader>fg <cmd>Telescope live_grep<cr>
-nnoremap <leader>fb <cmd>Telescope buffers<cr>
-nnoremap <leader>fh <cmd>Telescope help_tags<cr>
-
-
-" ======================= Basic Settings ========================
-set nocompatible               " Disable compatibility with old Vim
-filetype on                  " Enable file type detection
-filetype plugin on           " Enable plugin loading for file types
-filetype indent on           " Enable indentation rules for file types
-set signcolumn=auto
-
-set termguicolors            " Enable 24-bit RGB color
-set encoding=utf8            " Set encoding to UTF-8
-set number                   " Show line numbers
-set expandtab                " Use spaces instead of tabs
-set tabstop=4                " Set tab width to 4 spaces
-set shiftwidth=4             " Indent with 4 spaces
-set cursorline               " Highlight the current line
-
-" ===================== Key Mappings =====================
-" NERDTree key mappings
-nnoremap <leader>n :NERDTreeFocus<CR>
-nnoremap <C-n> :NERDTree<CR>
-nnoremap <C-t> :NERDTreeToggle<CR>
-nnoremap <C-f> :NERDTreeFind<CR>
-
-" FZF buffer search
-nnoremap <silent> <C-b> :Buffers<CR>
-
-" Vim-Slime settings for tmux
-let g:slime_target = "tmux"
-let g:slime_default_config = {"socket_name": "default", "target_pane": "1"}
-let g:slime_bracketed_paste = 1
-
-" ALE settings
-let g:ale_fixers = {'python': ['pylint']}
-let g:ale_linters = {'python': ['pylint']}
-let g:ale_python_pylint_options = '--disable=all --enable=E'
-
-" =================== Copilot Settings ====================
-" Remap Copilot accept to Ctrl + J
-inoremap <silent><script><expr> <C-J> copilot#Accept("\<CR>")
-let g:copilot_no_tab_map = v:true
-
-" =================== VimTeX Settings ====================
-let g:vimtex_view_method = 'zathura'
-let g:vimtex_compiler_progname = 'nvr'
-let g:vimtex_view_automatic = 0
-
-" Mapping for italicizing text in LaTeX
-vnoremap <C-i> :s/\%V\(.\+\)\%V/\\emph{\1}/g<CR>
-
-" =================== FZF Colors ====================
-let g:fzf_colors = {
-  \ 'fg':      ['white', 'Normal'],
-  \ 'bg':      ['black', 'Normal'],
-  \ 'hl':      ['yellow', 'Comment'],
-  \ 'fg+':     ['white', 'CursorLine', 'CursorColumn', 'Normal'],
-  \ 'bg+':     ['black', 'CursorLine', 'CursorColumn'],
-  \ 'hl+':     ['white', 'Statement'],
-  \ 'info':    ['white', 'PreProc'],
-  \ 'border':  ['white', 'Ignore'],
-  \ 'prompt':  ['white', 'Conditional'],
-  \ 'pointer': ['white', 'Exception'],
-  \ 'marker':  ['white', 'Keyword'],
-  \ 'spinner': ['white', 'Label'],
-  \ 'header':  ['white', 'Comment'] }
-
-" =================== Colorscheme ====================
-" colorscheme polar  " Use the polar colorscheme
-colorscheme tokyonight
-highlight WinSeparator guifg=#FFFFFF
-autocmd WinEnter * setlocal winhighlight=Normal:Normal
-autocmd WinLeave * setlocal winhighlight=Normal:InactiveWindow
-
-set fillchars+=vert:\┃
-
-
-
-" =================== Autocommands ====================
-" Remove trailing whitespace on save
-autocmd BufWritePre * :%s/\s\+$//e
-
-
-" ======================= toggleterm.nvim =======================
-" make the background of toggleterm transparent
-" print all the colors available in lua script after local colors
-" print(vim.inspect(colors))
-lua <<EOF
+-----------------------------------------------------------
+-- toggleterm.nvim
+-----------------------------------------------------------
 local colors = require("tokyonight.colors").setup()
-require'toggleterm'.setup {
+
+require("toggleterm").setup {
   size = 20,
   hide_numbers = true,
   shade_terminals = true,
   shading_factor = 3,
   start_in_insert = true,
   insert_mappings = true,
-  persist_size = true,
-  direction = 'horizontal',  -- Default direction
+  persist_size = false,
+  direction = "horizontal",
   close_on_exit = false,
   shell = vim.o.shell,
   highlights = {
     Normal = {
       guibg = colors.fg_gutter,
-    }
-  }
+    },
+  },
 }
-EOF
 
-highlight InactiveWindow guibg=#414868
-" Define Lua functions to toggle terminals horizontally or vertically
-lua <<EOF
+-- Global functions for toggleterm (horizontal / vertical)
 function _G.toggle_n_term_horizontal(term_id)
-  require('toggleterm.terminal').Terminal:new({ id = term_id, direction = 'horizontal' }):toggle()
+  require("toggleterm.terminal").Terminal:new({
+    id = term_id,
+    direction = "horizontal",
+  }):toggle()
 end
 
 function _G.toggle_n_term_vertical(term_id)
-  require('toggleterm.terminal').Terminal:new({ id = term_id, direction = 'vertical' }):toggle()
+  require("toggleterm.terminal").Terminal:new({
+    id = term_id,
+    direction = "vertical",
+  }):toggle()
 end
-EOF
 
-" Create key mappings for horizontal terminal toggles (1 to 10)
-for i in range(1, 10)
-  execute 'nnoremap <silent> <leader>th' . i . ' :lua toggle_n_term_horizontal(' . i . ')<CR>'
-endfor
+-- Keymaps for horizontal & vertical terminals (1-9)
+for i = 1, 9 do
+  map("n", "<leader>th" .. i, function()
+    _G.toggle_n_term_horizontal(i)
+  end, { silent = true, desc = "Toggleterm horizontal " .. i })
 
-" Create key mappings for vertical terminal toggles (1 to 10)
-for i in range(1, 10)
-  execute 'nnoremap <silent> <leader>tv' . i . ' :lua toggle_n_term_vertical(' . i . ')<CR>'
-endfor
+  map("n", "<leader>tv" .. i, function()
+    _G.toggle_n_term_vertical(i)
+  end, { silent = true, desc = "Toggleterm vertical " .. i })
+end
 
-" Map <Esc> to exit terminal mode
-autocmd TermOpen * tnoremap <buffer> <Esc> <C-\><C-n>
-autocmd InsertLeave,TextChanged * silent! write
+-----------------------------------------------------------
+-- Disable g; and g, jump-to-older-changes mappings
+-----------------------------------------------------------
+map("n", "g;", "<Nop>")
+map("n", "g,", "<Nop>")
 
-" Set fold method (options: manual, indent, expr, marker, syntax)
-set foldmethod=indent
+-----------------------------------------------------------
+-- Iron.nvim (REPL)
+-----------------------------------------------------------
+local view = require("iron.view")
+local repl_open_cmd = view.split("40%")
+local iron = require("iron.core")
 
-" Set fold level to start with all folds open
-set foldlevel=99
+iron.setup {
+  config = {
+    scratch_repl = true,
+    repl_definition = {
+      sh = {
+        command = { "zsh" },
+      },
+      python = {
+        command = { "ipython", "--no-autoindent" },
+        format = require("iron.fts.common").bracketed_paste_python,
+      },
+    },
+    repl_open_cmd = repl_open_cmd,
+  },
+  keymaps = {
+    send_motion = "<space>sc",
+    visual_send = "<space>sc",
+    send_file = "<space>sf",
+    send_line = "<space>sl",
+    send_paragraph = "<space>sp",
+    send_until_cursor = "<space>su",
+    send_mark = "<space>sm",
+    mark_motion = "<space>mc",
+    mark_visual = "<space>mc",
+    remove_mark = "<space>md",
+    cr = "<space>s<cr>",
+    interrupt = "<space>s<space>",
+    exit = "<space>sq",
+    clear = "<space>cl",
+  },
+  highlight = {
+    italic = true,
+  },
+  ignore_blank_lines = true,
+}
 
-"Toggle current fold
-nnoremap za :normal! za<CR>
+map("n", "<space>rs", "<cmd>IronRepl<cr>")
+map("n", "<space>rr", "<cmd>IronRestart<cr>")
+map("n", "<space>rf", "<cmd>IronFocus<cr>")
+map("n", "<space>rh", "<cmd>IronHide<cr>")
